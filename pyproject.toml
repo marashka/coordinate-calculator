@@ -29,6 +29,7 @@ dependencies = [
     "pydantic-settings-logging~=0.1.1",
     "pyyaml~=6.0.3",
     "sqlalchemy~=2.1.6",
+    "sqlalchemy-utils~=0.43.0",
     "uvicorn~=0.54.0",
 ]
 
@@ -38,6 +39,7 @@ exclude = ["tests"]
 
 [tool.setuptools.package-data]
 "*" = ["py.typed"]
+"coordinate_calculator.db.migrations" = ["alembic.ini", "script.py.mako"]
 
 [dependency-groups]
 dev = [
@@ -65,6 +67,11 @@ extend-exclude = ["Makefile"]
 select = ["ALL"]
 ignore = ["ARG", "ANN", "D", "TD", "FIX", "CPY001"]
 
+[tool.ruff.lint.per-file-ignores]
+"coordinate_calculator/db/migrations/*" = ["N999", "S"]
+"coordinate_calculator/db/repositories/*" = ["TC", "UP046", "PLR0913", "A002"]
+"coordinate_calculator/services/uow.py" = ["TC"]
+
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
 multiline-quotes = "double"
@@ -75,6 +82,10 @@ python_version = "3.14"
 plugins = ["pydantic.mypy"]
 strict_optional = true
 packages = ["coordinate_calculator"]
+
+[[tool.mypy.overrides]]
+module = "sqlalchemy_utils"
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pydantic_settings_logging"

@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: MIT
 from fastapi import FastAPI
 
+from coordinate_calculator.api.handlers import apply_exception_handlers
+from coordinate_calculator.api.monitoring import router as monitoring_router
+from coordinate_calculator.db.factory import create_session_factory
 from coordinate_calculator.logging import setup_logging
 from coordinate_calculator.settings.application import ApplicationSettings
 
@@ -16,6 +19,9 @@ def application_factory(settings: ApplicationSettings) -> FastAPI:
         version=__version__,
     )
     application.state.settings = settings
+    application.include_router(monitoring_router)
+    application.state.session_factory = create_session_factory(settings.database)
+    apply_exception_handlers(application)
     return application
 
 
