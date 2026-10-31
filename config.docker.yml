@@ -1,0 +1,2 @@
+database:
+  url: postgresql+asyncpg://coordinate_calculator:changeme@db:5432/coordinate_calculator

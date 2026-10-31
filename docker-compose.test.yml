@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: coordinate_calculator
+      POSTGRES_USER: coordinate_calculator
+      POSTGRES_PASSWORD: changeme
+    ports:
+      - 5437:5432
+    volumes:
+      - postgres_data_test:/var/lib/postgresql
+    healthcheck:
+      test: pg_isready
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 8000:8000
+    environment:
+      COORDINATE_CALCULATOR_CONFIG_FILE: /app/config.docker.yml
+    volumes:
+      - ./:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://localhost:8000/openapi.json
+      start_period: 5s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data_test:

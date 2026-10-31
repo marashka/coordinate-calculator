@@ -1,0 +1,113 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        priority: 0
+      - id: check-merge-conflict
+        priority: 0
+      - id: check-toml
+        priority: 0
+      - id: check-case-conflict
+        priority: 0
+      - id: check-vcs-permalinks
+        priority: 0
+      - id: end-of-file-fixer
+        types: [python]
+        priority: 1
+      - id: fix-byte-order-marker
+        priority: 2
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        types: [python]
+        priority: 3
+      - id: trailing-whitespace
+        priority: 4
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.6
+    hooks:
+      - id: remove-tabs
+        exclude: make.bat|Makefile
+        args: [--whitespaces-count, '2']
+        priority: 5
+      - id: chmod
+        args: ['644']
+        exclude_types: [shell]
+        exclude: ^(.*__main__\.py)$
+        priority: 6
+      - id: chmod
+        args: ['755']
+        files: ^(.*__main__\.py)$
+        priority: 6
+      - id: insert-license
+        files: .*\.py$
+        exclude: ^(tests/.*\.py)$
+        args:
+          - --license-filepath
+          - .spdx-license-header.txt
+          - --no-extra-eol
+        priority: 7
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.16.0
+    hooks:
+      - id: pretty-format-yaml
+        args: [--autofix, --indent, '2', --preserve-quotes, --offset, '2']
+        priority: 7
+
+  - repo: https://github.com/IamTheFij/docker-pre-commit
+    rev: v3.0.1
+    hooks:
+      - id: docker-compose-check
+        priority: 8
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        exclude: uv.lock
+        args: [-w]
+        additional_dependencies:
+          - tomli
+        priority: 8
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.13.6
+    hooks:
+      - id: uv-lock
+        priority: 9
+
+  - repo: local
+    hooks:
+      - id: ruff-format
+        name: ruff-format
+        language: system
+        entry: ruff format .
+        types: [python]
+        pass_filenames: false
+        priority: 9
+
+      - id: ruff-check
+        name: ruff-check
+        language: system
+        entry: ruff check --fix
+        types: [python]
+        pass_filenames: false
+        priority: 10
+
+      - id: mypy
+        name: mypy
+        entry: mypy coordinate_calculator
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+        priority: 11
+
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+        priority: 0
+      - id: check-useless-excludes
+        priority: 0
