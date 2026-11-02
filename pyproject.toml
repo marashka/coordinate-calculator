@@ -28,6 +28,8 @@ dependencies = [
     "pydantic-settings~=2.16.2",
     "pydantic-settings-logging~=0.1.1",
     "pyyaml~=6.0.3",
+    "sgp4~=2.27",
+    "skyfield~=1.55",
     "sqlalchemy~=2.1.6",
     "sqlalchemy-utils~=0.43.0",
     "uvicorn~=0.54.0",
@@ -69,8 +71,11 @@ ignore = ["ARG", "ANN", "D", "TD", "FIX", "CPY001"]
 
 [tool.ruff.lint.per-file-ignores]
 "coordinate_calculator/db/migrations/*" = ["N999", "S"]
+"coordinate_calculator/db/models/*" = ["TC"]
 "coordinate_calculator/db/repositories/*" = ["TC", "UP046", "PLR0913", "A002"]
 "coordinate_calculator/services/uow.py" = ["TC"]
+"coordinate_calculator/services/coordinates.py" = ["TC"]
+"coordinate_calculator/api/v1/router/*" = ["TC"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "double"
@@ -89,4 +94,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pydantic_settings_logging"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["sgp4", "sgp4.*", "skyfield", "skyfield.*"]
 ignore_missing_imports = true

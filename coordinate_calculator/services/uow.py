@@ -8,6 +8,8 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import HTTPConnection
 
+from coordinate_calculator.db.repositories.spacecraft import SpacecraftRepository
+
 
 async def get_session(connection: HTTPConnection) -> AsyncGenerator[AsyncSession]:
     async with connection.app.state.session_factory() as session:
@@ -20,6 +22,7 @@ class UnitOfWork:
         session: Annotated[AsyncSession, Depends(get_session)],
     ):
         self._session = session
+        self.spacecraft = SpacecraftRepository(session)
 
     async def __aenter__(self) -> Self:
         return self
