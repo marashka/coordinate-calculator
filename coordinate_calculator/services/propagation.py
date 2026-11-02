@@ -64,25 +64,42 @@ def propagate(
     step_seconds: int,
 ) -> list[CoordinatePoint]:
     viewed = EarthSatellite.from_satrec(satellite, _TIMESCALE)
+    moments = _moments(start, end, step_seconds)
+    position = viewed.at(_TIMESCALE.from_datetimes(moments))
+    _raise_if_propagation_failed(moments, position.message)
+    geographic = wgs84.geographic_position_of(position)
+    latitudes = geographic.latitude.degrees
+    longitudes = geographic.longitude.degrees
+    altitudes = geographic.elevation.km
+    return [
+        CoordinatePoint(
+            time=moment,
+            latitude_deg=float(latitudes[index]),
+            longitude_deg=float(longitudes[index]),
+            altitude_km=float(altitudes[index]),
+        )
+        for index, moment in enumerate(moments)
+    ]
+
+
+def _moments(start: datetime, end: datetime, step_seconds: int) -> list[datetime]:
     step = timedelta(seconds=step_seconds)
     moment = start.astimezone(UTC)
     finish = end.astimezone(UTC)
-    points: list[CoordinatePoint] = []
+    moments: list[datetime] = []
     while moment <= finish:
-        points.append(_point_at(viewed, moment))
+        moments.append(moment)
         moment += step
-    return points
+    return moments
 
 
-def _point_at(satellite: EarthSatellite, moment: datetime) -> CoordinatePoint:
-    position = satellite.at(_TIMESCALE.from_datetime(moment))
-    if position.message:
-        message = f"SGP4 failed at {moment.isoformat()}: {position.message}"
+def _raise_if_propagation_failed(moments: list[datetime], messages: object) -> None:
+    if isinstance(messages, str):
+        message = f"SGP4 failed at {moments[0].isoformat()}: {messages}"
         raise CalculationError(message)
-    geographic = wgs84.geographic_position_of(position)
-    return CoordinatePoint(
-        time=moment,
-        latitude_deg=float(geographic.latitude.degrees),
-        longitude_deg=float(geographic.longitude.degrees),
-        altitude_km=float(geographic.elevation.km),
-    )
+    if not isinstance(messages, list):
+        return
+    for moment, detail in zip(moments, messages, strict=True):
+        if detail:
+            message = f"SGP4 failed at {moment.isoformat()}: {detail}"
+            raise CalculationError(message)
